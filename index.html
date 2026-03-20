@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARBOOK — Din Bil. Dens Historie.</title>
+
+
+<style>
+  :root {
+    --black: #f5f2ed;
+    --deep: #edeae4;
+    --carbon: #e4e0d8;
+    --gunmetal: #d0ccc3;
+    --silver: #7a7670;
+    --light-silver: #4a4744;
+    --white: #1a1814;
+    --gold: #9a6f20;
+    --red: #c0392b;
+    --accent: #b8820a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: Arial, sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 4rem;
+    background: linear-gradient(to bottom, rgba(245,242,237,0.97), rgba(245,242,237,0));
+    backdrop-filter: blur(2px);
+  }
+  .nav-logo {
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 0.3em;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+  nav ul {
+    list-style: none;
+    display: flex; gap: 2.5rem;
+  }
+  nav ul a {
+    font-family: Arial, sans-serif;
+    font-weight: 300;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  nav ul a:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 4rem 6rem;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background-image: url('10_small.jpg');
+    background-size: cover;
+    background-position: center 40%;
+    filter: brightness(0.45);
+    transform: scale(1.05);
+    animation: heroZoom 20s ease-in-out infinite alternate;
+  }
+  @keyframes heroZoom {
+    from { transform: scale(1.05); }
+    to { transform: scale(1.0); }
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(245,242,237,0.97) 0%,
+      rgba(245,242,237,0.4) 50%,
+      rgba(245,242,237,0.15) 100%
+    );
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .hero-eyebrow {
+    font-family: Arial, sans-serif;
+    font-weight: 200;
+    font-size: 0.75rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .hero-title {
+    font-family: Arial, sans-serif;
+    font-weight: 300;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-sub {
+    max-width: 500px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--light-silver);
+    margin-bottom: 3rem;
+  }
+  .hero-ctas {
+    display: flex; gap: 1.5rem; align-items: center;
+  }
+  .btn-primary {
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    padding: 1rem 2.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-primary:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    font-family: Arial, sans-serif;
+    font-weight: 300;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white);
+    text-decoration: none;
+    border-bottom: 1px solid var(--silver);
+    padding-bottom: 2px;
+    transition: all 0.3s;
+  }
+  .btn-ghost:hover { color: var(--gold); border-color: var(--gold); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 0 4rem;
+    margin: 2rem 0;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--gunmetal); }
+  .divider-mark {
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--silver);
+    text-transform: uppercase;
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 8rem 4rem; }
+  .section-eyebrow {
+    font-family: Arial, sans-serif;
+    font-weight: 200;
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: Arial, sans-serif;
+    font-weight: 300;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+  .section-title em { font-style: italic; color: var(--gold); }
+
+  /* ── ABOUT ── */
+  #om {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    background: var(--deep);
+  }
+  .about-image-stack { position: relative; height: 600px; }
+  .about-img {
+    position: absolute;
+    object-fit: cover;
+    border: 1px solid var(--gunmetal);
+  }
+  .about-img:nth-child(1) {
+    width: 80%; height: 75%;
+    top: 0; left: 0;
+  }
+  .about-img:nth-child(2) {
+    width: 55%; height: 50%;
+    bottom: 0; right: 0;
+    border: 3px solid var(--gold);
+  }
+  .about-text p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--light-silver);
+    margin-bottom: 1.5rem;
+  }
+  .about-text p strong {
+    color: var(--white);
+    font-weight: 400;
+  }
+  .photographer-credit {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gunmetal);
+    font-family: Arial, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+  .photographer-credit strong {
+    color: var(--gold);
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-top: 0.3rem;
+    font-weight: 600;
+  }
+
+  /* ── WHAT'S INCLUDED ── */
+  #hvad-indgaar {
+    background: var(--black);
+  }
+  .includes-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-bottom: 5rem;
+    align-items: end;
+  }
+  .includes-intro {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--light-silver);
+  }
+  .includes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .include-item {
+    background: var(--deep);
+    padding: 2.5rem 2rem;
+    border-left: 3px solid transparent;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+  .include-item::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--gunmetal);
+  }
+  .include-item:hover {
+    border-left-color: var(--gold);
+    background: var(--carbon);
+  }
+  .include-number {
+    font-family: Arial, sans-serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--gunmetal);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .include-title {
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 0.75rem;
+  }
+  .include-desc {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--silver);
+  }
+
+  /* ── PHOTO BOOK DEMO ── */
+  #eksempel {
+    background: var(--deep);
+    padding: 8rem 0;
+  }
+  #eksempel .section-header {
+    padding: 0 4rem;
+    margin-bottom: 4rem;
+  }
+
+  /* Book spread layout */
+  .book-wrapper {
+    padding: 0 4rem;
+    margin-bottom: 4rem;
+  }
+  .book-spread {
+    background: #f5f2ed;
+    border: 1px solid var(--gunmetal);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+
+  /* Spread 1: Full cover */
+  .spread-cover {
+    position: relative;
+    height: 70vh;
+    display: flex; align-items: flex-end;
+    padding: 4rem;
+    overflow: hidden;
+  }
+  .spread-cover img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.5);
+  }
+  .spread-cover-content {
+    position: relative; z-index: 2;
+  }
+  .spread-cover-content .book-make {
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.6em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .spread-cover-content h2 {
+    font-family: Arial, sans-serif;
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    font-weight: 300;
+    line-height: 0.9;
+    margin-bottom: 0.5rem;
+  }
+  .spread-cover-content .book-year {
+    font-family: Arial, sans-serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--silver);
+  }
+
+  /* Spread 2: 2-col layout */
+  .spread-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 500px;
+  }
+  .spread-2col > div { position: relative; }
+  .spread-2col img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .spread-text-panel {
+    padding: 4rem;
+    display: flex; flex-direction: column; justify-content: center;
+    background: #f5f2ed;
+    border-left: 1px solid var(--gunmetal);
+  }
+  .spread-text-panel h3 {
+    font-family: Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    color: var(--white);
+  }
+  .spread-text-panel p {
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--silver);
+    margin-bottom: 1.5rem;
+  }
+  .spec-list {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--gunmetal);
+    padding-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .spec-item label {
+    display: block;
+    font-family: Arial, sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.2rem;
+  }
+  .spec-item span {
+    font-size: 0.85rem;
+    color: var(--light-silver);
+  }
+
+  /* Spread 3: 3-image grid */
+  .spread-3grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+    height: 500px;
+    background: var(--gunmetal);
+  }
+  .spread-3grid > div { overflow: hidden; }
+  .spread-3grid > div:first-child { grid-row: span 2; }
+  .spread-3grid img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform 0.6s ease;
+  }
+  .spread-3grid > div:hover img { transform: scale(1.03); }
+
+  /* Spread 4: Detail strip */
+  .spread-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    height: 280px;
+    background: var(--gunmetal);
+  }
+  .spread-strip > div { overflow: hidden; }
+  .spread-strip img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform 0.6s ease;
+  }
+  .spread-strip > div:hover img { transform: scale(1.05); }
+
+  /* Spread 5: History page */
+  .spread-history {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    min-height: 500px;
+  }
+  .history-panel {
+    padding: 4rem;
+    background: #edeae4;
+    border-right: 1px solid var(--gunmetal);
+  }
+  .history-panel h3 {
+    font-family: Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .history-panel p {
+    font-size: 0.875rem;
+    line-height: 1.9;
+    color: var(--silver);
+    margin-bottom: 1rem;
+  }
+  .timeline {
+    margin-top: 2rem;
+    border-top: 1px solid var(--gunmetal);
+    padding-top: 1.5rem;
+  }
+  .timeline-item {
+    display: flex; gap: 1.5rem;
+    margin-bottom: 1.2rem;
+    align-items: flex-start;
+  }
+  .timeline-year {
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--gold);
+    min-width: 45px;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .timeline-event {
+    font-size: 0.825rem;
+    line-height: 1.6;
+    color: var(--silver);
+  }
+  .spread-history > div:last-child { overflow: hidden; }
+  .spread-history > div:last-child img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  /* Spread 6: Economy table */
+  .spread-economy {
+    padding: 4rem;
+    background: #f5f2ed;
+    border-top: 1px solid var(--gunmetal);
+  }
+  .spread-economy h3 {
+    font-family: Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+  .economy-sub {
+    font-size: 0.8rem;
+    color: var(--silver);
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.05em;
+  }
+  .economy-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 2.5rem;
+  }
+  .econ-cell {
+    background: var(--carbon);
+    padding: 1.5rem;
+  }
+  .econ-cell label {
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .econ-cell .value {
+    font-family: Arial, sans-serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--white);
+  }
+  .econ-cell .note {
+    font-size: 0.75rem;
+    color: var(--silver);
+    margin-top: 0.2rem;
+  }
+  .price-curve {
+    background: #edeae4;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .price-curve-label {
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-bottom: 1.5rem;
+  }
+  /* SVG chart */
+  .price-chart svg { width: 100%; height: 120px; }
+
+  /* Page numbers */
+  .page-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 4rem;
+    border-top: 1px solid var(--gunmetal);
+    background: #ede9e2;
+  }
+  .page-num {
+    font-family: Arial, sans-serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--silver);
+  }
+  .page-model {
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+
+  /* ── PRICING ── */
+  #priser {
+    background: var(--black);
+  }
+  .pricing-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 6rem;
+    margin-top: 4rem;
+  }
+  .price-card {
+    background: var(--deep);
+    border: 1px solid var(--gunmetal);
+    padding: 3.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s;
+  }
+  .price-card:hover { border-color: var(--gold); }
+  .price-card-featured {
+    border-color: var(--gold);
+  }
+  .price-card-featured::before {
+    content: 'MEST POPULÆR';
+    position: absolute;
+    top: 1.5rem; right: -2.5rem;
+    background: var(--gold);
+    color: var(--black);
+    font-family: Arial, sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    padding: 0.3rem 3rem;
+    transform: rotate(35deg);
+  }
+  .price-label {
+    font-family: Arial, sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+  .price-name {
+    font-family: Arial, sans-serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+  .price-amount {
+    font-family: Arial, sans-serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1;
+    margin: 1.5rem 0 0.3rem;
+  }
+  .price-amount sup {
+    font-size: 1.5rem;
+    vertical-align: super;
+    color: var(--silver);
+  }
+  .price-vat {
+    font-size: 0.8rem;
+    color: var(--silver);
+    margin-bottom: 2rem;
+  }
+  .price-features {
+    list-style: none;
+    margin-bottom: 2.5rem;
+  }
+  .price-features li {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--light-silver);
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--gunmetal);
+    display: flex; gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .price-features li::before {
+    content: '—';
+    color: var(--gold);
+    flex-shrink: 0;
+    margin-top: 0.05em;
+  }
+  .pricing-notes {
+    margin-top: 4rem;
+    background: var(--carbon);
+    padding: 3rem;
+    border-left: 3px solid var(--gold);
+  }
+  .pricing-notes h3 {
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .note-item {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--silver);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gunmetal);
+  }
+  .note-item strong { color: var(--white); font-weight: 400; }
+
+  /* ── PROCESS ── */
+  #forloeb {
+    background: var(--deep);
+  }
+  .process-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 4rem;
+    background: var(--gunmetal);
+  }
+  .process-step {
+    background: var(--carbon);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .step-num {
+    font-family: Arial, sans-serif;
+    font-size: 5rem;
+    font-weight: 300;
+    color: rgba(201,168,76,0.15);
+    line-height: 1;
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+  }
+  .step-title {
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .step-time {
+    font-family: Arial, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .step-desc {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--silver);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── CTA / KONTAKT ── */
+  #kontakt {
+    position: relative;
+    min-height: 70vh;
+    display: flex; align-items: center;
+    overflow: hidden;
+    padding: 10rem 4rem;
+  }
+  .cta-bg {
+    position: absolute; inset: 0;
+    background-image: url('15_small.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.25);
+  }
+  .cta-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(245,242,237,0.88) 0%, rgba(245,242,237,0.6) 100%);
+  }
+  .cta-content {
+    position: relative; z-index: 2;
+    max-width: 700px;
+  }
+  .cta-content .section-title { margin-bottom: 1.5rem; }
+  .cta-content p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--light-silver);
+    margin-bottom: 3rem;
+  }
+  .cta-phone {
+    font-family: Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+  }
+  .cta-email {
+    font-size: 0.9rem;
+    color: var(--silver);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--gunmetal);
+    padding-bottom: 2px;
+    transition: all 0.3s;
+  }
+  .cta-email:hover { color: var(--gold); border-color: var(--gold); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--carbon);
+    padding: 3rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--gunmetal);
+  }
+  .footer-logo {
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.3em;
+    color: var(--white);
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-copy {
+    font-size: 0.75rem;
+    color: var(--silver);
+    letter-spacing: 0.05em;
+  }
+  .footer-tagline {
+    font-family: Arial, sans-serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--silver);
+  }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 1.5rem 2rem; }
+    nav ul { gap: 1.5rem; }
+    section { padding: 5rem 2rem; }
+    .hero { padding: 0 2rem 4rem; }
+    #om { grid-template-columns: 1fr; }
+    .about-image-stack { height: 350px; }
+    .includes-header { grid-template-columns: 1fr; }
+    .includes-grid { grid-template-columns: 1fr; }
+    .spread-2col, .spread-history { grid-template-columns: 1fr; }
+    .spread-history > div:last-child { height: 300px; }
+    .pricing-layout { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: 1fr 1fr; }
+    .economy-grid { grid-template-columns: repeat(2,1fr); }
+    .notes-grid { grid-template-columns: 1fr; }
+    .spread-strip { grid-template-columns: repeat(2,1fr); height: auto; }
+    .spread-strip > div { height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">CAR<span>BOOK</span></a>
+  <ul>
+    <li><a href="#om">Om os</a></li>
+    <li><a href="#hvad-indgaar">Hvad indgår</a></li>
+    <li><a href="#eksempel">Eksempel</a></li>
+    <li><a href="#priser">Priser</a></li>
+    <li><a href="#kontakt">Kontakt</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Professionel bil­dokumentation · Siden 1993</p>
+    <h1 class="hero-title">Din bil.<br><em>Dens</em> historie.</h1>
+    <p class="hero-sub">En komplet dokumentation af din bil — fotograferet, beskrevet og bevaret af en fotograf med årtier i branchen. Til efterslægten. Til markedet. Til dig.</p>
+    <div class="hero-ctas">
+      <a href="#eksempel" class="btn-primary">Se eksempel</a>
+      <a href="#priser" class="btn-ghost">Se priser</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider">
+  <div class="divider-line"></div>
+  <span class="divider-mark">Eksklusiv beldokumentasjon</span>
+  <div class="divider-line"></div>
+</div>
+
+<!-- OM OS -->
+<section id="om">
+  <div class="about-image-stack reveal">
+    <img class="about-img" src="11_small.jpg" alt="Ferrari i showroom" loading="lazy">
+    <img class="about-img" src="1_small.jpg" alt="Ferrari motor" loading="lazy">
+  </div>
+  <div class="about-text reveal">
+    <p class="section-eyebrow">Om os</p>
+    <h2 class="section-title">Fortalt af<br><em>en ekspert</em></h2>
+    <p>Bag CARBOOK står en professionel bilentusiast og fotograf med <strong>flere årtiers erfaring</strong> i at fotografere og dokumentere eksklusive biler. Fra klassiske veteraner til moderne hypercars.</p>
+    <p>Vi tror på, at enhver særlig bil fortjener at blive behandlet som det kunstværk, den er. Ikke bare et par snapshots — men en <strong>komplet, professionel dokumentation</strong> der fanger maskinens sjæl, dens historie og dens nuværende tilstand.</p>
+    <p>Vores dokumentationer bruges af privatpersoner der elsker deres bil, af samlere der vil sikre proveniens, og af sælgere der vil opnå den rette pris på markedet.</p>
+    <div class="photographer-credit">
+      Fotograf &amp; Forfatter
+      <strong>Mere end 30 år bag kameraet</strong>
+    </div>
+  </div>
+</section>
+
+<!-- HVAD INDGÅR -->
+<section id="hvad-indgaar">
+  <div class="includes-header reveal">
+    <div>
+      <p class="section-eyebrow">Hvad indgår</p>
+      <h2 class="section-title">Alt om<br><em>din bil</em></h2>
+    </div>
+    <p class="includes-intro">En CARBOOK-dokumentation er en total gennemgang — fotografisk, historisk og teknisk. Vi graver alt frem, der kan fortælle din bils unikke historie.</p>
+  </div>
+  <div class="includes-grid">
+    <div class="include-item reveal">
+      <div class="include-number">01</div>
+      <div class="include-title">Op til 100 fotos</div>
+      <p class="include-desc">Professionelle billeder i høj opløsning — eksterior, interiør, motor, detaljer og chassis. Optaget med studie-setup og naturlys.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">02</div>
+      <div class="include-title">Tekniske specs</div>
+      <p class="include-desc">Motortype, ydelse, gearkasse, produktionstal, VIN-dekodning, fabriksfarve og udstyrkoder. Produktionsattest hvis tilgængelig.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">03</div>
+      <div class="include-title">Modellens historie</div>
+      <p class="include-desc">Hvem designede bilen? Hvorfor blev den lavet? Motorsport, konkurrenter, milepæle og dens plads i bilhistorien.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">04</div>
+      <div class="include-title">Bilens unikke liv</div>
+      <p class="include-desc">Hvad kan vi grave frem om netop denne bil? Import, eksport, tidligere ejere, skadehistorik og service­journaler.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">05</div>
+      <div class="include-title">Økonomi &amp; priser</div>
+      <p class="include-desc">Nypris, prisudvikling over tid, aktuelle markedspriser og sammenligning med tilsvarende eksemplarer på markedet.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">06</div>
+      <div class="include-title">Online i 1 år</div>
+      <p class="include-desc">Din dokumentation publiceres online med videodokumentation i 12 måneder. Herefter vedligeholdelse for kun 300 kr./år.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">07</div>
+      <div class="include-title">Designer­info</div>
+      <p class="include-desc">Hvem stod bag designet? Carozzeria, chefdesigner, inspirationskilder og designets placering i tidens kontekst.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">08</div>
+      <div class="include-title">Fabrik &amp; produktion</div>
+      <p class="include-desc">Hvilken fabrik? Produktionsår og -nummer. Evt. særlige produktionslinjer, jubilæumsmodeller eller løbenumre.</p>
+    </div>
+    <div class="include-item reveal">
+      <div class="include-number">09</div>
+      <div class="include-title">Fuld dagstid</div>
+      <p class="include-desc">Hele fotograferingsdagen er afsat til din bil. Vi tager os tid til at fange det hele rigtigt — ingen stress, ingen kompromiser.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EKSEMPEL FOTOBOG -->
+<section id="eksempel">
+  <div class="section-header reveal">
+    <p class="section-eyebrow">Eksempel</p>
+    <h2 class="section-title">Sådan ser en <em>CARBOOK</em> ud</h2>
+  </div>
+
+  <!-- SPREAD 1: Cover -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-cover">
+        <img src="10_small.jpg" alt="Ferrari F430 Spider">
+        <div class="spread-cover-content">
+          <p class="book-make">Ferrari · Rosso Corsa</p>
+          <h2>F430<br>Spider</h2>
+          <span class="book-year">2005 — Pininfarina</span>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Forside</span>
+        <span class="page-model">Ferrari F430 Spider · 2005 · Granturismo Cars</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 2: Intro + Specs -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-2col">
+        <div>
+          <img src="16_small.jpg" alt="Ferrari F430 bagfra">
+        </div>
+        <div class="spread-text-panel">
+          <h3>En italiensk katedrale på fire hjul</h3>
+          <p>Ferrari F430 Spider er indbegrebet af, hvad en åben Ferrari bør være: en maskine der engagerer alle sanser på én gang. Vinden, lyden af V8'eren bag ryggen, det taktile rat.</p>
+          <p>Designet af Pininfarina og præsenteret i 2005, udgjorde F430 et kvantesprang i forhold til forgængeren 360 Modena. Det nye chassis, den ny motor og den forbedrede aerodynamik satte nye standarder for klassen.</p>
+          <div class="spec-list">
+            <div class="spec-item">
+              <label>Motor</label>
+              <span>4.3L V8 Naturaspiret</span>
+            </div>
+            <div class="spec-item">
+              <label>Ydelse</label>
+              <span>490 hk @ 8.500 rpm</span>
+            </div>
+            <div class="spec-item">
+              <label>0–100 km/t</label>
+              <span>4,1 sekunder</span>
+            </div>
+            <div class="spec-item">
+              <label>Topfart</label>
+              <span>295 km/t</span>
+            </div>
+            <div class="spec-item">
+              <label>Gearkasse</label>
+              <span>F1-robotgear, 6-trins</span>
+            </div>
+            <div class="spec-item">
+              <label>Produktion</label>
+              <span>2004–2009</span>
+            </div>
+            <div class="spec-item">
+              <label>Karosseri</label>
+              <span>Spider (Cabriolet)</span>
+            </div>
+            <div class="spec-item">
+              <label>Designer</label>
+              <span>Pininfarina · Frank Stephenson</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 2–3</span>
+        <span class="page-model">Introduktion &amp; Specifikationer</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 3: 3-image grid -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-3grid">
+        <div><img src="14_small.jpg" alt="Ferrari bagfra fuld"></div>
+        <div><img src="7_small.jpg" alt="Ferrari hjul"></div>
+        <div><img src="18_small.jpg" alt="Pininfarina badge"></div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 4–5</span>
+        <span class="page-model">Eksterior Galleri</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 4: Detail strip -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-strip">
+        <div><img src="4_small.jpg" alt="Ferrari badge sill"></div>
+        <div><img src="17_small.jpg" alt="Tankdæksel"></div>
+        <div><img src="6_small.jpg" alt="Kontroller center"></div>
+        <div><img src="8_small.jpg" alt="Sæde detalje"></div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 6–7</span>
+        <span class="page-model">Detaljer</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 5: Interior spread -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-2col">
+        <div class="spread-text-panel" style="border-left:none; border-right:1px solid #d0ccc3;">
+          <h3>Interiøret — en cockpit til racerpiloten</h3>
+          <p>Kabinen er funktionel og teatralsk på én gang. Det store orange tachometer dominerer instrumentbrættet og sender tankerne mod Ferraris racing-DNA. Speedometeret er kalibreret til 360 km/t — en påmindelse om, hvad maskinen i princippet kan.</p>
+          <p>Carbonfiber dominerer overflader overalt: rattet, midterkonsollen, dørstykkerne og skærmens inderkanter. Den røde kontrastsyning løber som en rød tråd igennem hele interiøret.</p>
+          <div class="spec-list" style="grid-template-columns:1fr;">
+            <div class="spec-item">
+              <label>Sæder</label>
+              <span>Sort læder med rød kontrastsyning og prancing horse</span>
+            </div>
+            <div class="spec-item">
+              <label>Rat</label>
+              <span>Carbon/læder med F1-paddles og manettino</span>
+            </div>
+            <div class="spec-item">
+              <label>Tachometer</label>
+              <span>Orange med redline ved 8.500 rpm</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <img src="2_small.jpg" alt="Ferrari interiør">
+        </div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 8–9</span>
+        <span class="page-model">Interiør</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 6: History -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-history">
+        <div class="history-panel">
+          <h3>Denne bils unikke liv</h3>
+          <p>Ud over modellens generelle historik graver vi alt frem, der kan fortælle den specifikke bils liv — fra fabrikslinjen til i dag.</p>
+          <p>Her er det F1-verdensmesterskabs-plaketten på instrumentbrættet, der fortæller os at bilen sandsynligvis er et 2005-model solgt da Ferrari fejrede 1999–2004 titlerne. Indregistreringshistorikken, den specifikke kombinasjon af udstyr og kilometermålerstanden på 18.829 km bekræfter at dette er et ekstremt velholdt eksemplar.</p>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="timeline-year">2005</span>
+              <span class="timeline-event">Produceret på Ferrari-fabrikken i Maranello, Italien. Solgt som ny.</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-year">2005–</span>
+              <span class="timeline-event">Documenteret servicehistorik hos autoriseret Ferrari-forhandler</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-year">Nu</span>
+              <span class="timeline-event">18.829 km. Underholdstilstand. Ingen registrerede skader eller uheld.</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <img src="9_small.jpg" alt="Ferrari F1 champion plaquette">
+        </div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 10–11</span>
+        <span class="page-model">Bilens Historie</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 7: Motor -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-2col">
+        <div><img src="13_small.jpg" alt="Ferrari F430 motor"></div>
+        <div class="spread-text-panel">
+          <h3>Hjertet — V8 på 4.3 liter</h3>
+          <p>Motoren i F430 er et ingeniørkunstværk. Den 4.308 cc store V8-motor er direkte nedstammet fra Ferraris Formel 1-program og producerer 490 hk ved 8.500 omdrejninger.</p>
+          <p>Drejningsmomentet på 465 Nm er distribueret via et robotiseret 6-trins F1-gearkasse med gearskift på under 150 millisekunder. Motorblokken er i aluminium, og ventilstyringen er komplet variabel.</p>
+          <div class="spec-list">
+            <div class="spec-item">
+              <label>Slagvolumen</label>
+              <span>4.308 cc</span>
+            </div>
+            <div class="spec-item">
+              <label>Ydelse</label>
+              <span>490 hk / 360 kW</span>
+            </div>
+            <div class="spec-item">
+              <label>Drejningsmoment</label>
+              <span>465 Nm</span>
+            </div>
+            <div class="spec-item">
+              <label>Kompression</label>
+              <span>11,3:1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 12–13</span>
+        <span class="page-model">Motor &amp; Teknik</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPREAD 8: Economy -->
+  <div class="book-wrapper reveal">
+    <div class="book-spread">
+      <div class="spread-economy">
+        <h3>Økonomi & Markedsudvikling</h3>
+        <p class="economy-sub">Priser i DKK inkl. moms · markedsdata fra godkendte auktions­huse og dealere</p>
+        <div class="economy-grid">
+          <div class="econ-cell">
+            <label>Nypris (2005)</label>
+            <div class="value">~1,4M</div>
+            <div class="note">DKK inkl. afgifter</div>
+          </div>
+          <div class="econ-cell">
+            <label>Lavpunkt (ca. 2013)</label>
+            <div class="value">~650K</div>
+            <div class="note">DKK markedsbund</div>
+          </div>
+          <div class="econ-cell">
+            <label>Aktuel markedsværdi</label>
+            <div class="value">~950K</div>
+            <div class="note">DKK pristilstand</div>
+          </div>
+          <div class="econ-cell">
+            <label>Km-stand dette eks.</label>
+            <div class="value">18.829</div>
+            <div class="note">Kilometer · Verificeret</div>
+          </div>
+        </div>
+        <div class="price-curve">
+          <div class="price-curve-label">Estimeret prisudvikling 2005–2025 · Ferrari F430 Spider</div>
+          <div class="price-chart">
+            <svg viewBox="0 0 900 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#c9a84c" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#c9a84c" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="0" y1="30" x2="900" y2="30" stroke="#d0ccc3" stroke-width="1"/>
+              <line x1="0" y1="60" x2="900" y2="60" stroke="#d0ccc3" stroke-width="1"/>
+              <line x1="0" y1="90" x2="900" y2="90" stroke="#d0ccc3" stroke-width="1"/>
+              <!-- Area fill -->
+              <path d="M0,20 C50,22 100,40 180,75 C260,90 300,95 380,85 C420,80 460,78 520,72 C580,65 640,58 700,50 C760,42 820,35 900,30 L900,120 L0,120 Z" fill="url(#chartGrad)"/>
+              <!-- Line -->
+              <path d="M0,20 C50,22 100,40 180,75 C260,90 300,95 380,85 C420,80 460,78 520,72 C580,65 640,58 700,50 C760,42 820,35 900,30" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+              <!-- Points -->
+              <circle cx="0" cy="20" r="4" fill="#c9a84c"/>
+              <circle cx="300" cy="95" r="4" fill="#c9a84c"/>
+              <circle cx="900" cy="30" r="4" fill="#c9a84c"/>
+              <!-- Labels -->
+              <text x="5" y="15" fill="#8a8a8a" font-size="10" font-family="Arial, sans-serif">2005</text>
+              <text x="275" y="113" fill="#8a8a8a" font-size="10" font-family="Arial, sans-serif">2012</text>
+              <text x="870" y="26" fill="#8a8a8a" font-size="10" font-family="Arial, sans-serif">2025</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span class="page-num">Side 14–15</span>
+        <span class="page-model">Markedsværdi &amp; Prisudvikling</span>
+        <span class="page-num">CARBOOK</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRISER -->
+<section id="priser">
+  <div class="reveal">
+    <p class="section-eyebrow">Priser</p>
+    <h2 class="section-title">Hvad koster<br>en <em>CARBOOK</em>?</h2>
+  </div>
+
+  <div class="pricing-layout">
+    <div>
+      <div class="price-card price-card-featured reveal">
+        <p class="price-label">Standard pakke</p>
+        <h3 class="price-name">CARBOOK Complete</h3>
+        <div class="price-amount"><sup>DKK </sup>9.999</div>
+        <p class="price-vat">Inklusiv moms · Én bil</p>
+        <ul class="price-features">
+          <li>Op til 100 professionelle fotos i høj opløsning</li>
+          <li>Komplet teknisk dokumentation med specs og udstyrkoder</li>
+          <li>Modellens designhistorie og baggrund</li>
+          <li>Denne specifikke bils unikke livshistorie</li>
+          <li>Økonomianalyse: nypris, markedsudvikling og aktuel værdi</li>
+          <li>Fabriks- og produktionsinformation</li>
+          <li>Online publisering med video-dokumentation i 12 måneder</li>
+          <li>En fuld dagstid til fotografering</li>
+        </ul>
+        <a href="#kontakt" class="btn-primary">Book en dagstid</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="price-card reveal" style="margin-bottom:2px;">
+        <p class="price-label">Abonnement</p>
+        <h3 class="price-name">Online Arkiv</h3>
+        <div class="price-amount"><sup>DKK </sup>300<sup style="font-size:1rem">/år</sup></div>
+        <p class="price-vat">Efter første år · Pr. bil</p>
+        <ul class="price-features">
+          <li>Din dokumentation forbliver online</li>
+          <li>Video-dokumentation vedligeholdes</li>
+          <li>Kan til enhver tid opsiges</li>
+        </ul>
+      </div>
+
+      <div class="pricing-notes reveal">
+        <h3>Tillæg &amp; Særlige vilkår</h3>
+        <div class="notes-grid">
+          <div class="note-item"><strong>Fyn, Øerne</strong><br>+1.000 kr. transporttillæg</div>
+          <div class="note-item"><strong>Nordjylland</strong><br>+1.500 kr. transporttillæg</div>
+          <div class="note-item"><strong>Kørsel &amp; specielle settings</strong><br>Pristillæg aftales individuelt</div>
+          <div class="note-item"><strong>Samlerpakker</strong><br>Ring for tilbud ved flere biler</div>
+          <div class="note-item"><strong>Ekstra detaljer</strong><br>Specialopgaver aftales enkeltvis</div>
+          <div class="note-item"><strong>Pakkeløsning</strong><br>Samlere kan gå sammen om pris</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORLØB -->
+<section id="forloeb">
+  <div class="reveal">
+    <p class="section-eyebrow">Sådan foregår det</p>
+    <h2 class="section-title">Fra kontakt til<br><em>færdig dokumentation</em></h2>
+  </div>
+  <div class="process-steps">
+    <div class="process-step reveal">
+      <div class="step-num">1</div>
+      <div class="step-time">Dag 1</div>
+      <div class="step-title">Kontakt &amp; Aftale</div>
+      <p class="step-desc">Ring eller skriv. Vi aftaler dato, sted og eventuelle specielle ønsker. Ingen binding ved første kontakt.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">2</div>
+      <div class="step-time">Fotograferingsdagen</div>
+      <div class="step-title">En fuld dagstid</div>
+      <p class="step-desc">Vi mødes ved bilen. En hel dag er sat af — vi fotograferer alt uden tidspres. Du behøver ikke at gøre noget særligt.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">3</div>
+      <div class="step-time">1–2 uger efter</div>
+      <div class="step-title">Research &amp; Tekst</div>
+      <p class="step-desc">Vi graver historien frem: servicedokumenter, registreringer, markedsdata, modellens baggrund og bilens specifikke liv.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">4</div>
+      <div class="step-time">Levering</div>
+      <div class="step-title">CARBOOK online</div>
+      <p class="step-desc">Din komplette dokumentation er online med fotos, tekst og video. Du modtager link og digitale filer. Aktiv i 12 måneder.</p>
+    </div>
+  </div>
+</section>
+
+<!-- KONTAKT / CTA -->
+<section id="kontakt">
+  <div class="cta-bg"></div>
+  <div class="cta-overlay"></div>
+  <div class="cta-content">
+    <p class="section-eyebrow">Kontakt</p>
+    <h2 class="section-title">Klar til at<br><em>bevare din bil?</em></h2>
+    <p>Ring eller skriv — vi aftaler en uforpligtende snak om din bil og dine ønsker. Har du en samling, ringerer vi gerne om en pakkeløsning.</p>
+    <a href="tel:+4512345678" class="cta-phone">+45 12 34 56 78</a>
+    <a href="/cdn-cgi/l/email-protection#177c787963767c63577476657578787c39737c" class="cta-email"><span class="__cf_email__" data-cfemail="6b0004051f0a001f2b080a1909040400450f00">[email&#160;protected]</span></a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">CAR<span>BOOK</span></div>
+  <div class="footer-tagline">Din bil. Dens historie.</div>
+  <div class="footer-copy">© 2025 CARBOOK · Alle rettigheder forbeholdes</div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // Stagger children in grids
+  document.querySelectorAll('.includes-gr
